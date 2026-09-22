@@ -9,10 +9,16 @@ sent you. Everything runs on your PC, nothing is uploaded.
 
 ## Download
 
-Grab `TableSnip-<version>-win-x64.zip` from the
-[latest release](https://github.com/CognitoBit/TableSnip/releases/latest), unzip it anywhere and run
-`TableSnip.exe`. No installer. Needs Windows 10 (1809+) or Windows 11 and the .NET 8 Desktop
-Runtime, which Windows offers to install on first launch if it is missing.
+From the [latest release](https://github.com/CognitoBit/TableSnip/releases/latest):
+
+- **`TableSnip-Setup-<version>.exe`** (recommended). Installs per user with no admin prompt, adds a
+  Start Menu entry, and can open TableSnip at sign-in so Ctrl+Alt+T is always ready. Everything it
+  needs is included; nothing else to install.
+- **`TableSnip-<version>-win-x64.zip`** (portable). Unzip anywhere and run `TableSnip.exe`. Needs
+  the .NET 8 Desktop Runtime, which Windows offers to install on first launch if it is missing.
+
+Both need Windows 10 (1809+) or Windows 11, 64-bit. The files are not code-signed, so SmartScreen may
+show "Windows protected your PC" the first time; click *More info* → *Run anyway*.
 
 ## Use it
 
@@ -23,6 +29,9 @@ Runtime, which Windows offers to install on first launch if it is missing.
 That's it. The table is on your clipboard the moment the snip is read, so step 3 is the only thing
 left to do. The window shows what was read so you can check it, fix a cell (double-click), delete a
 row (select its number, press Delete) or save it as CSV.
+
+Closing the window keeps TableSnip in the system tray so Ctrl+Alt+T keeps working. Click the tray
+icon to bring the window back, or right-click it to quit.
 
 Other ways in:
 
@@ -65,16 +74,25 @@ dotnet build src\TableSnip\TableSnip.csproj -c Release
 ## Make a distributable
 
 ```powershell
-.\publish.ps1
+.\publish.ps1 -Installer
 ```
 
-This produces `dist\TableSnip\` (a single `TableSnip.exe` plus the `tessdata\` and `x64\` folders it
-needs beside it) and `dist\TableSnip-win-x64.zip`, about 11 MB. Share the zip; people unzip and run.
+This produces, in `dist\`:
 
-`.\publish.ps1 -SelfContained` bundles the .NET runtime as well for PCs that don't have it (roughly
-70 MB larger). The default build needs the .NET 8 Desktop Runtime, which Windows offers to install
-on first launch. Tesseract's native library also needs the Microsoft Visual C++ 2015-2022
-redistributable, which almost every Windows PC already has.
+- `TableSnip-Setup-<version>.exe`, the installer to share. It is self-contained (bundles the .NET
+  runtime), installs per user without an admin prompt, registers an uninstaller, and offers "open at
+  sign-in" and desktop-shortcut options. Built with [Inno Setup 6](https://jrsoftware.org/isinfo.php)
+  from `installer\TableSnip.iss`; install it once with `winget install JRSoftware.InnoSetup`.
+- `TableSnip-<version>-win-x64.zip`, the portable build: a single `TableSnip.exe` plus the
+  `tessdata\` and `x64\` folders it needs beside it, about 11 MB. Needs the .NET 8 Desktop Runtime
+  on the target PC. Add `-SelfContained` to bundle the runtime here too.
+
+Tesseract's native library needs the Microsoft Visual C++ 2015-2022 runtime. When a Visual Studio
+installation is present (it is on GitHub's build runners) its three DLLs are bundled app-local; when
+they are not bundled, the installer downloads the runtime from Microsoft on PCs that lack it.
+
+Leave out `-Installer` to build only the zip. Pass `-Version 1.2.3` to stamp a version; otherwise the
+one in the csproj is used.
 
 To publish a release on GitHub, tag a commit and push the tag:
 
@@ -83,9 +101,9 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The `Release` workflow in `.github/workflows` builds the zip on a Windows runner and attaches it to
-a GitHub Release with generated notes. Every push to `main` also runs the `Build` workflow, which
-uploads the zip as a downloadable artifact.
+The `Release` workflow in `.github/workflows` builds the installer and the zip on a Windows runner
+and attaches both to a GitHub Release with generated notes. Every push to `main` also runs the
+`Build` workflow, which uploads them as downloadable artifacts.
 
 The app is not code-signed, so SmartScreen may show "Windows protected your PC" on first launch.
 Click *More info* → *Run anyway*.

@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -17,6 +18,8 @@ public partial class MainWindow : Window
 {
     private readonly Recognizer _recognizer;
     private readonly bool _startWithSnip;
+    private TrayIcon? _tray;
+    private bool _quitting, _trayHintShown;
     private List<OcrWord>? _words;
     private System.Drawing.Bitmap? _image;
     private DataTable? _table;
@@ -28,11 +31,15 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _rebuildTimer = new() { Interval = TimeSpan.FromMilliseconds(180) };
     private readonly DispatcherTimer _copiedTimer = new() { Interval = TimeSpan.FromSeconds(2.2) };
 
-    public MainWindow(bool startWithSnip = false)
+    public MainWindow(bool startWithSnip = false, bool startInTray = false)
     {
         InitializeComponent();
         _startWithSnip = startWithSnip;
         _recognizer = new Recognizer();
+
+        // When starting hidden in the tray the window is never shown, but the global hotkey and
+        // the tray icon are set up in OnSourceInitialized, which needs a window handle.
+        if (startInTray) new WindowInteropHelper(this).EnsureHandle();
 
         _rebuildTimer.Tick += (_, _) => { _rebuildTimer.Stop(); RebuildTable(copyToClipboard: true); };
         _copiedTimer.Tick += (_, _) =>
@@ -61,7 +68,51 @@ public partial class MainWindow : Window
         {
             HotkeyHint.Visibility = Visibility.Collapsed;
         }
+
+        _tray = new TrayIcon(LoadAppIcon(), _hotKey?.DisplayText);
+        _tray.OpenRequested += ShowFromTray;
+        _tray.SnipRequested += SnipFromTray;
+        _tray.QuitRequested += Quit;
+
         ShowIdleStatus();
+    }
+
+    private static System.Drawing.Icon LoadAppIcon()
+    {
+        var res = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app.ico"))
+                  ?? throw new InvalidOperationException("app.ico missing");
+        return new System.Drawing.Icon(res.Stream, System.Windows.Forms.SystemInformation.SmallIconSize);
+    }
+
+    // ------------------------------------------------------------------ tray
+
+    public void ShowFromTray() => ShowAndActivate();
+
+    public void SnipFromTray() => _ = SnipAsync();
+
+    public void Quit()
+    {
+        _quitting = true;
+        Close();
+        Application.Current.Shutdown();
+    }
+
+    /// <summary>Closing the window keeps TableSnip in the tray so the global hotkey stays available.</summary>
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (!_quitting && _tray != null)
+        {
+            e.Cancel = true;
+            Hide();
+            if (!_trayHintShown)
+            {
+                _trayHintShown = true;
+                var trigger = _hotKey != null ? $"Press {_hotKey.DisplayText}" : "Click the tray icon";
+                _tray.ShowBalloon("TableSnip is still running", $"{trigger} any time to snip a table. Right-click the tray icon to quit.");
+            }
+            return;
+        }
+        base.OnClosing(e);
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -71,6 +122,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        _tray?.Dispose();
         _hotKey?.Dispose();
         _image?.Dispose();
         _recognizer.Dispose();
@@ -95,15 +147,20 @@ public partial class MainWindow : Window
         _snipping = true;
         try
         {
-            Hide();
-            await Task.Delay(250); // let the window actually disappear before we grab the screen
+            bool wasVisible = IsVisible;
+            if (wasVisible)
+            {
+                Hide();
+                await Task.Delay(250); // let the window actually disappear before we grab the screen
+            }
 
             System.Drawing.Bitmap? bmp = null;
             string? error = null;
             try { bmp = await SnipSession.CaptureAsync(); }
             catch (Exception ex) { error = ex.Message; }
 
-            ShowAndActivate();
+            // A cancelled snip started from the tray leaves the window hidden, as it was.
+            if (wasVisible || bmp != null || error != null) ShowAndActivate();
             if (error != null) SetStatus("Couldn't capture the screen: " + error, ok: false);
             else if (bmp != null) await ProcessImageAsync(bmp);
         }

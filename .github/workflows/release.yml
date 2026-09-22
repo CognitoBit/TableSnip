@@ -1,6 +1,7 @@
 name: Release
 
-# Push a tag like v1.0.0 and this builds the zip and attaches it to a GitHub Release.
+# Push a tag like v1.2.3 and this builds the installer and portable zip on a Windows runner and
+# attaches both to a GitHub Release.
 on:
   push:
     tags: ["v*"]
@@ -13,30 +14,40 @@ jobs:
   release:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
-      - name: Publish distributable
+      - name: Ensure Inno Setup
         shell: pwsh
-        run: .\publish.ps1
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
 
-      - name: Name the zip after the tag
+      - name: Build installer and portable zip
         shell: pwsh
-        run: Copy-Item dist\TableSnip-win-x64.zip "dist\TableSnip-${{ github.ref_name }}-win-x64.zip"
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart("v")
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { $v = "0.0.0" }
+          .\publish.ps1 -Installer -Version $v
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
-          files: dist/TableSnip-${{ github.ref_name }}-win-x64.zip
+          files: |
+            dist/TableSnip-Setup-*.exe
+            dist/TableSnip-*-win-x64.zip
           generate_release_notes: true
 
-      - name: Upload zip (manual runs)
+      - name: Upload artifacts (manual runs)
         if: "!startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: TableSnip-win-x64
-          path: dist/TableSnip-win-x64.zip
+          path: |
+            dist/TableSnip-Setup-*.exe
+            dist/TableSnip-*-win-x64.zip

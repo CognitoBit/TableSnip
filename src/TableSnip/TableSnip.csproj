@@ -12,11 +12,13 @@
     <RootNamespace>TableSnip</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>TableSnip</Product>
     <Description>Snip a table from your screen and paste it into Excel or Google Sheets.</Description>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <InvariantGlobalization>false</InvariantGlobalization>
+    <!-- WFAC010: WinForms analyzer wants DPI set in code, but WPF owns DPI here via app.manifest. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

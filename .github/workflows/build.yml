@@ -10,21 +10,30 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
       - name: Build
         run: dotnet build src\TableSnip\TableSnip.csproj -c Release
 
-      - name: Publish distributable
+      - name: Ensure Inno Setup
         shell: pwsh
-        run: .\publish.ps1
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
 
-      - name: Upload zip
-        uses: actions/upload-artifact@v4
+      - name: Build installer and portable zip
+        shell: pwsh
+        run: .\publish.ps1 -Installer
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
         with:
           name: TableSnip-win-x64
-          path: dist/TableSnip-win-x64.zip
+          path: |
+            dist/TableSnip-Setup-*.exe
+            dist/TableSnip-*-win-x64.zip
