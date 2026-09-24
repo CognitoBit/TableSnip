@@ -5,22 +5,23 @@
     <Application.Resources>
         <ResourceDictionary>
 
-            <!-- Theme brushes: overwritten at runtime by Theme.Apply() -->
-            <SolidColorBrush x:Key="Brush.Window" Color="#F7F7F8"/>
+            <!-- Theme brushes (light palette from design/design.md); overwritten at runtime by Theme.Apply() -->
+            <SolidColorBrush x:Key="Brush.Window" Color="#F7F5F0"/>
             <SolidColorBrush x:Key="Brush.Surface" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="Brush.Border" Color="#E3E3E6"/>
-            <SolidColorBrush x:Key="Brush.Text" Color="#1B1B1F"/>
-            <SolidColorBrush x:Key="Brush.TextMuted" Color="#6E6E76"/>
-            <SolidColorBrush x:Key="Brush.Accent" Color="#0F6CBD"/>
-            <SolidColorBrush x:Key="Brush.AccentHover" Color="#115EA3"/>
-            <SolidColorBrush x:Key="Brush.AccentSoft" Color="#180F6CBD"/>
-            <SolidColorBrush x:Key="Brush.OnAccent" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="Brush.Hover" Color="#ECECEF"/>
-            <SolidColorBrush x:Key="Brush.Success" Color="#0E7A3B"/>
-            <SolidColorBrush x:Key="Brush.GridLine" Color="#EAEAEE"/>
-            <SolidColorBrush x:Key="Brush.HeaderBg" Color="#F3F3F5"/>
-            <SolidColorBrush x:Key="Brush.Selection" Color="#280F6CBD"/>
-            <SolidColorBrush x:Key="Brush.Busy" Color="#A0FFFFFF"/>
+            <SolidColorBrush x:Key="Brush.Border" Color="#DAD6CD"/>
+            <SolidColorBrush x:Key="Brush.Text" Color="#141414"/>
+            <SolidColorBrush x:Key="Brush.TextMuted" Color="#6F6A60"/>
+            <SolidColorBrush x:Key="Brush.Accent" Color="#B5730F"/>
+            <SolidColorBrush x:Key="Brush.AccentHover" Color="#9A6109"/>
+            <SolidColorBrush x:Key="Brush.AccentSoft" Color="#1CB5730F"/>
+            <SolidColorBrush x:Key="Brush.OnAccent" Color="#141414"/>
+            <SolidColorBrush x:Key="Brush.MarkKnown" Color="#C9C5BC"/>
+            <SolidColorBrush x:Key="Brush.Hover" Color="#EFECE5"/>
+            <SolidColorBrush x:Key="Brush.Success" Color="#3B7D3A"/>
+            <SolidColorBrush x:Key="Brush.GridLine" Color="#E9E5DC"/>
+            <SolidColorBrush x:Key="Brush.HeaderBg" Color="#F3F0E9"/>
+            <SolidColorBrush x:Key="Brush.Selection" Color="#30B5730F"/>
+            <SolidColorBrush x:Key="Brush.Busy" Color="#A0F7F5F0"/>
 
             <!-- Icons (16x16 stroke paths) -->
             <Geometry x:Key="IconSnip">M2,6 V3.5 A1.5,1.5 0 0 1 3.5,2 H6 M10,2 H12.5 A1.5,1.5 0 0 1 14,3.5 V6 M14,10 V12.5 A1.5,1.5 0 0 1 12.5,14 H10 M6,14 H3.5 A1.5,1.5 0 0 1 2,12.5 V10</Geometry>

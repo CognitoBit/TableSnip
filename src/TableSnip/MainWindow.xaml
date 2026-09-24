@@ -65,11 +65,40 @@
             <!-- Empty state -->
             <Grid x:Name="EmptyState">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="460">
-                    <Border Width="72" Height="72" CornerRadius="18" Background="{DynamicResource Brush.AccentSoft}" HorizontalAlignment="Center">
-                        <Path Data="{StaticResource IconSnip}" Stroke="{DynamicResource Brush.Accent}" StrokeThickness="2"
-                              StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                              Width="16" Height="16" Stretch="Uniform" Margin="20"/>
-                    </Border>
+                    <!-- The TableSnip mark (design/design.md): a 4x4 grid; amber header row and first column,
+                         grey cells, and one cell left empty: the one still to be read. -->
+                    <Viewbox Width="64" Height="64" HorizontalAlignment="Center">
+                        <Canvas Width="65.12" Height="65.12">
+                            <Canvas.Resources>
+                                <Style x:Key="Known" TargetType="Rectangle">
+                                    <Setter Property="Width" Value="15.11"/>
+                                    <Setter Property="Height" Value="15.11"/>
+                                    <Setter Property="RadiusX" Value="2.83"/>
+                                    <Setter Property="RadiusY" Value="2.83"/>
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.MarkKnown}"/>
+                                </Style>
+                                <Style x:Key="Learning" TargetType="Rectangle" BasedOn="{StaticResource Known}">
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.Accent}"/>
+                                </Style>
+                            </Canvas.Resources>
+                            <Rectangle Style="{StaticResource Learning}" Canvas.Left="0" Canvas.Top="0"/>
+                            <Rectangle Style="{StaticResource Learning}" Canvas.Left="16.67" Canvas.Top="0"/>
+                            <Rectangle Style="{StaticResource Learning}" Canvas.Left="33.34" Canvas.Top="0"/>
+                            <Rectangle Style="{StaticResource Learning}" Canvas.Left="50.01" Canvas.Top="0"/>
+                            <Rectangle Style="{StaticResource Learning}" Canvas.Left="0" Canvas.Top="16.67"/>
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="16.67" Canvas.Top="16.67"/>
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="33.34" Canvas.Top="16.67"/>
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="50.01" Canvas.Top="16.67"/>
+                            <Rectangle Style="{StaticResource Learning}" Canvas.Left="0" Canvas.Top="33.34"/>
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="16.67" Canvas.Top="33.34"/>
+                            <!-- row 3, column 3 stays empty -->
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="50.01" Canvas.Top="33.34"/>
+                            <Rectangle Style="{StaticResource Learning}" Canvas.Left="0" Canvas.Top="50.01"/>
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="16.67" Canvas.Top="50.01"/>
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="33.34" Canvas.Top="50.01"/>
+                            <Rectangle Style="{StaticResource Known}" Canvas.Left="50.01" Canvas.Top="50.01"/>
+                        </Canvas>
+                    </Viewbox>
                     <TextBlock Text="Turn any table on your screen into cells" FontSize="21" FontWeight="SemiBold"
                                TextAlignment="Center" Margin="0,22,0,8"/>
                     <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" TextAlignment="Center" LineHeight="20"

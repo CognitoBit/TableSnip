@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="design/tablesnip-mark-dark.svg">
+    <img src="design/tablesnip-mark.svg" width="88" alt="TableSnip mark: a 4x4 grid with an amber header row and first column, and one cell still empty">
+  </picture>
+</p>
+
 # TableSnip
 
 Snip a table from anywhere on your screen and paste it straight into Excel or Google Sheets.

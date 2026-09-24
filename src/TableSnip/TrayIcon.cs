@@ -40,6 +40,14 @@ public sealed class TrayIcon : IDisposable
     public void ShowBalloon(string title, string text) =>
         _icon.ShowBalloonTip(5000, title, text, ToolTipIcon.None);
 
+    /// <summary>Swap the glyph, e.g. when the taskbar flips between light and dark.</summary>
+    public void SetIcon(System.Drawing.Icon icon)
+    {
+        var old = _icon.Icon;
+        _icon.Icon = icon;
+        old?.Dispose();
+    }
+
     public void Dispose()
     {
         _icon.Visible = false;

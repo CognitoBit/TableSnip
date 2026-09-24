@@ -69,18 +69,36 @@ public partial class MainWindow : Window
             HotkeyHint.Visibility = Visibility.Collapsed;
         }
 
-        _tray = new TrayIcon(LoadAppIcon(), _hotKey?.DisplayText);
+        _tray = new TrayIcon(LoadTrayIcon(), _hotKey?.DisplayText);
         _tray.OpenRequested += ShowFromTray;
         _tray.SnipRequested += SnipFromTray;
         _tray.QuitRequested += Quit;
+        Theme.Changed += OnThemeChanged;
 
         ShowIdleStatus();
     }
 
-    private static System.Drawing.Icon LoadAppIcon()
+    private void OnThemeChanged() => _tray?.SetIcon(LoadTrayIcon());
+
+    /// <summary>
+    /// Single-colour tray glyph (design/design.md): white on a dark taskbar, black on a light one.
+    /// The taskbar follows the Windows *system* theme, which can differ from the app theme.
+    /// </summary>
+    private static System.Drawing.Icon LoadTrayIcon()
     {
-        var res = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app.ico"))
-                  ?? throw new InvalidOperationException("app.ico missing");
+        bool lightTaskbar = false;
+        try
+        {
+            var v = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+                "SystemUsesLightTheme", 0);
+            lightTaskbar = Convert.ToInt32(v ?? 0) == 1;
+        }
+        catch
+        {
+        }
+        var name = lightTaskbar ? "tray-black.ico" : "tray-white.ico";
+        var res = Application.GetResourceStream(new Uri($"pack://application:,,,/Assets/{name}"))
+                  ?? throw new InvalidOperationException(name + " missing");
         return new System.Drawing.Icon(res.Stream, System.Windows.Forms.SystemInformation.SmallIconSize);
     }
 
@@ -122,6 +140,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        Theme.Changed -= OnThemeChanged;
         _tray?.Dispose();
         _hotKey?.Dispose();
         _image?.Dispose();

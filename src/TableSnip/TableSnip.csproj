@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\*.ico" />
   </ItemGroup>
 
   <ItemGroup>
